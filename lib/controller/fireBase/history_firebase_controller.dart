@@ -162,12 +162,6 @@ class HistoryFirebaseController {
             .doc(getCurrentEmail())
             .collection(collectionName)
             .doc(docID);
-        final CollectionReference collectionReference = db
-            .collection('users')
-            .doc(getCurrentEmail())
-            .collection(collectionName)
-            .doc(docID)
-            .collection('episodes');
 
         await documentReference.delete();
       } else {
@@ -200,9 +194,9 @@ class HistoryFirebaseController {
       // Xóa tài liệu gốc
       await documentRef.delete();
 
-      print('Tài liệu và subcollections đã được xóa thành công!');
+      log('Tài liệu và subcollections đã được xóa thành công!');
     } catch (e) {
-      print('Lỗi khi xóa tài liệu: $e');
+      log('Lỗi khi xóa tài liệu: $e');
     }
   }
 

@@ -34,8 +34,6 @@ class MovieDetail extends StatefulWidget {
 }
 
 class _MovieDetailState extends State<MovieDetail> {
-
-
   //GetX Controller
   final stateController = Get.find<StateManager>();
   final movieController = Get.find<MovieController>();
@@ -47,7 +45,6 @@ class _MovieDetailState extends State<MovieDetail> {
 
   // scroll controller
   final scrollController = ScrollController();
-
 
   bool isLoading = true;
 
@@ -202,11 +199,7 @@ class _MovieDetailState extends State<MovieDetail> {
                                   child: Text('Có lỗi xảy ra!'));
                             }
 
-
-
                             //  nếu có dữ liệu
-
-
                             if (snapshot.hasData &&
                                 snapshot.data!.docs.isNotEmpty) {
                               final document = snapshot.data!.docs.first;
@@ -763,7 +756,8 @@ class _MovieDetailState extends State<MovieDetail> {
                                                 Navigator.pop(context);
                                               },
                                               style: TextButton.styleFrom(
-                                                  minimumSize: const Size(80, 60)),
+                                                  minimumSize:
+                                                      const Size(80, 60)),
                                               child: Column(
                                                 mainAxisAlignment:
                                                     MainAxisAlignment.center,
