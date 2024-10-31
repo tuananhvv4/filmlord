@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
@@ -7,9 +6,7 @@ import 'package:quickalert/models/quickalert_type.dart';
 import 'package:quickalert/widgets/quickalert_dialog.dart';
 
 import '../../controller/GetX/state_controller.dart';
-import '../../controller/fireBase/user_firebase_controller.dart';
-
-
+import '../../api/fireBase/user_firebase_controller.dart';
 
 class SignUpPage extends StatefulWidget {
   final VoidCallback showSignUpPage;
@@ -26,8 +23,6 @@ class _SignUpPageState extends State<SignUpPage> {
 
   // GetX
   final stateController = Get.find<StateManager>();
-  //Firebase Controller
-  final firebaseController = UserFirebaseController();
 
   bool hideText = true;
   bool isButtonDisabled = false;
@@ -35,24 +30,24 @@ class _SignUpPageState extends State<SignUpPage> {
   Future signUp() async {
     String message = '';
 
-
-    if(_emailController.text.trim().isEmpty || _passController.text.trim().isEmpty || _rePassController.text.trim().isEmpty){
+    if (_emailController.text.trim().isEmpty ||
+        _passController.text.trim().isEmpty ||
+        _rePassController.text.trim().isEmpty) {
       message = 'Vui lòng điền vào trường văn bản còn thiếu!';
-    }else if(_passController.text.trim().length < 6 ){
+    } else if (_passController.text.trim().length < 6) {
       message = 'Mật khẩu phải có ít nhất 6 kí tự!';
-    }
-    else if(_passController.text.trim() != _rePassController.text.trim()){
+    } else if (_passController.text.trim() != _rePassController.text.trim()) {
       message = 'Mật khẩu đã nhập không khớp!';
-    }else{
-
+    } else {
       setState(() {
         isButtonDisabled = true;
       });
 
-      bool isSuccess = await  firebaseController.userSignUp(_emailController.text.trim(),_passController.text.trim(),context);
-      if(isSuccess){
-        // ignore: use_build_context_synchronously
+      bool isSuccess = await UserFirebaseController.userSignUp(
+          _emailController.text.trim(), _passController.text.trim(), context);
+      if (isSuccess) {
         stateController.updateLoginState(true);
+        // ignore: use_build_context_synchronously
         Navigator.pop(context);
       }
 
@@ -60,16 +55,16 @@ class _SignUpPageState extends State<SignUpPage> {
       setState(() {
         isButtonDisabled = false;
       });
-
     }
 
-    if(message.isNotEmpty){
-      QuickAlert.show(context: context,
+    if (message.isNotEmpty) {
+      QuickAlert.show(
+          // ignore: use_build_context_synchronously
+          context: context,
           type: QuickAlertType.error,
           title: message,
           confirmBtnText: 'OK');
     }
-
   }
 
   @override
@@ -112,18 +107,18 @@ class _SignUpPageState extends State<SignUpPage> {
                         begin: Alignment.bottomCenter,
                         end: Alignment.topCenter,
                         colors: [
-                          Colors.black.withOpacity(1.0),
-                          Colors.black.withOpacity(0.90),
-                          Colors.black.withOpacity(0.65),
-                          Colors.black.withOpacity(0.65),
-                          Colors.black.withOpacity(0.65),
-                          Colors.black.withOpacity(0.65),
-                          Colors.black.withOpacity(0.60),
-                          Colors.black.withOpacity(0.50),
-                          Colors.black.withOpacity(0.50),
-                          Colors.black.withOpacity(0.70),
-                          Colors.black.withOpacity(1),
-                        ])),
+                      Colors.black.withOpacity(1.0),
+                      Colors.black.withOpacity(0.90),
+                      Colors.black.withOpacity(0.65),
+                      Colors.black.withOpacity(0.65),
+                      Colors.black.withOpacity(0.65),
+                      Colors.black.withOpacity(0.65),
+                      Colors.black.withOpacity(0.60),
+                      Colors.black.withOpacity(0.50),
+                      Colors.black.withOpacity(0.50),
+                      Colors.black.withOpacity(0.70),
+                      Colors.black.withOpacity(1),
+                    ])),
               ),
             ),
             Padding(
@@ -136,14 +131,20 @@ class _SignUpPageState extends State<SignUpPage> {
                   ),
                   const Text(
                     'Đăng ký',
-                    style: TextStyle(color: Colors.white, fontSize: 30,fontWeight: FontWeight.w600),
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 30,
+                        fontWeight: FontWeight.w600),
                   ),
                   const SizedBox(
                     height: 10,
                   ),
                   const Text(
                     'Đăng ký ngay để theo dõi và tận hưởng kho phim cực khủng từ FILMLORD!',
-                    style: TextStyle(color: Colors.white, fontSize: 14,fontWeight: FontWeight.w300),
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w300),
                   ),
                   const SizedBox(
                     height: 40,
@@ -155,24 +156,20 @@ class _SignUpPageState extends State<SignUpPage> {
                     //     borderRadius: BorderRadius.circular(5)),
                     child: Column(
                       children: [
-                        Container(
-                          // decoration: BoxDecoration(
-                          //   borderRadius: BorderRadius.circular(15),
-                          //   color: Colors.white24,
-                          // ),
-                          child: TextField(
-                            controller: _emailController,
-                            decoration: const InputDecoration(
-                                prefixIcon: Icon(Icons.email),
-                                prefixIconColor: Colors.white,
-                                hintText: 'Email',
-                                hintStyle: TextStyle(color: Colors.white70),
-                                border: OutlineInputBorder(),
-                            ),
-                            style: const TextStyle(color: Colors.white),
+                        TextField(
+                          controller: _emailController,
+                          decoration: const InputDecoration(
+                            prefixIcon: Icon(Icons.email),
+                            prefixIconColor: Colors.white,
+                            hintText: 'Email',
+                            hintStyle: TextStyle(color: Colors.white70),
+                            border: OutlineInputBorder(),
                           ),
+                          style: const TextStyle(color: Colors.white),
                         ),
-                        const SizedBox(height: 10,),
+                        const SizedBox(
+                          height: 10,
+                        ),
                         TextField(
                           controller: _passController,
                           decoration: InputDecoration(
@@ -187,13 +184,17 @@ class _SignUpPageState extends State<SignUpPage> {
                                     hideText = !hideText;
                                   });
                                 },
-                                icon: hideText ?  Icon(Iconsax.eye_slash) : Icon(Iconsax.eye),
+                                icon: hideText
+                                    ? const Icon(Iconsax.eye_slash)
+                                    : const Icon(Iconsax.eye),
                                 color: Colors.white,
                               )),
-                          obscureText: hideText? true : false,
+                          obscureText: hideText ? true : false,
                           style: const TextStyle(color: Colors.white),
                         ),
-                        const SizedBox(height: 10,),
+                        const SizedBox(
+                          height: 10,
+                        ),
                         TextField(
                           controller: _rePassController,
                           decoration: InputDecoration(
@@ -208,18 +209,22 @@ class _SignUpPageState extends State<SignUpPage> {
                                     hideText = !hideText;
                                   });
                                 },
-                                icon: hideText ?  Icon(Iconsax.eye_slash) : Icon(Iconsax.eye),
+                                icon: hideText
+                                    ? const Icon(Iconsax.eye_slash)
+                                    : const Icon(Iconsax.eye),
                                 color: Colors.white,
                               )),
-                          obscureText: hideText? true : false,
+                          obscureText: hideText ? true : false,
                           style: const TextStyle(color: Colors.white),
                         ),
                       ],
                     ),
                   ),
-                  const SizedBox(height: 50,),
+                  const SizedBox(
+                    height: 50,
+                  ),
                   Container(
-                      margin: const EdgeInsets.only(left: 80,right: 80),
+                      margin: const EdgeInsets.only(left: 80, right: 80),
                       alignment: Alignment.center,
                       height: 45,
                       width: MediaQuery.of(context).size.width,
@@ -227,19 +232,20 @@ class _SignUpPageState extends State<SignUpPage> {
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(5)),
                       child: TextButton(
-                        onPressed: isButtonDisabled? null : signUp,
-
+                        onPressed: isButtonDisabled ? null : signUp,
                         style: TextButton.styleFrom(
-                          padding: const EdgeInsets.all(0),),
+                          padding: const EdgeInsets.all(0),
+                        ),
                         child: Container(
                             alignment: Alignment.center,
-                            child: isButtonDisabled? LoadingAnimationWidget.waveDots(color: Colors.black, size: 20)
+                            child: isButtonDisabled
+                                ? LoadingAnimationWidget.waveDots(
+                                    color: Colors.black, size: 20)
                                 : const Text(
-                              'ĐĂNG KÝ',
-                              style: TextStyle(
-                                  fontSize: 15, color: Colors.black),
-                            )
-                        ),
+                                    'ĐĂNG KÝ',
+                                    style: TextStyle(
+                                        fontSize: 15, color: Colors.black),
+                                  )),
                       )),
                   const SizedBox(
                     height: 40,
@@ -256,11 +262,12 @@ class _SignUpPageState extends State<SignUpPage> {
                   ),
                   TextButton(
                     onPressed: widget.showSignUpPage,
+                    style:
+                        TextButton.styleFrom(padding: const EdgeInsets.all(0)),
                     child: const Text(
                       'Đăng nhập',
-                      style: TextStyle(color: Colors.white, fontSize: 17),
+                      style: TextStyle(color: Colors.white, fontSize: 18),
                     ),
-                    style: TextButton.styleFrom(padding: const EdgeInsets.all(0)),
                   )
                 ],
               ),

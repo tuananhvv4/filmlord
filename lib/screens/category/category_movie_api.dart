@@ -22,7 +22,7 @@ class CategoryMovieList extends StatefulWidget {
 }
 
 class _CategoryMovieListState extends State<CategoryMovieList> {
-  late String URL;
+  late String url;
 
   int page = 1;
 
@@ -34,61 +34,22 @@ class _CategoryMovieListState extends State<CategoryMovieList> {
 
   final ScrollController scrollController = ScrollController();
 
-  // Future fetchData() async {
-  //   final SharedPreferences prefs = await SharedPreferences.getInstance();
-  //   dynamic jsonData;
-  //   log(widget.category);
-  //   if(prefs.containsKey(widget.category)){
-  //     var jsonString = await getCacheData(); // lấy dữ liệu từ String
-  //     jsonData = jsonDecode(jsonString); // chuyển từ String thành Map
-  //   }else{
-  //     var response = await http.get(Uri.parse(URL));
-  //     jsonData = jsonDecode(response.body);
-  //     setCacheData(jsonEncode(jsonData));
-  //     // log('không có data');
-  //   }
-  //
-  //   for(var item in jsonData['data']){
-  //     Data itemData = Data.fromJson(item);
-  //     listMovieData.add(itemData);
-  //   }
-  // }
-
-  // Future loadMore() async {
-  //   setState(() {
-  //     page += 1;
-  //     URL = 'https://nguyenanh.site/api/movie_app/category-movie.php?type=${widget.category}&page=$page';
-  //   });
-  //   var response = await http.get(Uri.parse(URL));
-  //   var jsonData = jsonDecode(response.body);
-  //   if(mounted){
-  //     setState(() {
-  //       for(var item in jsonData['data']){
-  //         Data itemData = Data.fromJson(item);
-  //         listMovieData.add(itemData);
-  //       }
-  //       if(jsonData['total'] < 10){
-  //         loadMoreState = false;
-  //       }
-  //     });
-  //   }
-  //
-  // }
-
   Future fetchData() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     dynamic jsonData;
     // log(widget.category);
     if (prefs.containsKey(widget.category)) {
-      List<Data> jsonDataList = await getData(); // lấy dữ liệu đã cache
+      List<Data> jsonDataList =
+          await Helper.getData(widget.category); // lấy dữ liệu đã cache
       listMovieData = jsonDataList; // chuyển từ String thành Map
     } else {
-      var response = await http.get(Uri.parse(URL));
+      var response = await http.get(Uri.parse(url));
       jsonData = jsonDecode(response.body);
       for (var item in jsonData['data']) {
         Data itemData = Data.fromJson(item);
         listMovieData.add(itemData);
-        saveData(listMovieData); // lưu dữ liệu vào bộ nhớ
+        Helper.saveData(
+            widget.category, listMovieData); // lưu dữ liệu vào bộ nhớ
       }
     }
   }
@@ -101,12 +62,12 @@ class _CategoryMovieListState extends State<CategoryMovieList> {
     }
     setState(() {
       page += 1;
-      URL =
+      url =
           'https://nguyenanh.site/api/movie_app/category-movie.php?type=${widget.category}&page=$page';
     });
     prefs.setInt(
         '${widget.category}-currentPage', page); // lưu lại trang hiện tại
-    var response = await http.get(Uri.parse(URL));
+    var response = await http.get(Uri.parse(url));
     var jsonData = jsonDecode(response.body);
     if (mounted) {
       setState(() {
@@ -114,7 +75,7 @@ class _CategoryMovieListState extends State<CategoryMovieList> {
           Data itemData = Data.fromJson(item);
           listMovieData.add(itemData);
         }
-        saveData(listMovieData);
+        Helper.saveData(widget.category, listMovieData);
 
         if (jsonData['total'] < 10) {
           loadMoreState = false;
@@ -123,39 +84,9 @@ class _CategoryMovieListState extends State<CategoryMovieList> {
     }
   }
 
-  // Lưu danh sách vào SharedPreferences
-  Future<void> saveData(List<Data> data) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    List<String> personList =
-        data.map((person) => jsonEncode(person.toJson())).toList();
-    prefs.setStringList(widget.category, personList);
-  }
-
-// Lấy danh sách từ SharedPreferences
-  Future<List<Data>> getData() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    List<String>? personList = prefs.getStringList(widget.category);
-    if (personList != null) {
-      return personList.map((item) => Data.fromJson(jsonDecode(item))).toList();
-    }
-    return [];
-  }
-
-  Future<void> setCacheData(String value) async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setString(widget.category, value); // Xóa tất cả dữ liệu đã lưu
-  }
-
-  Future<String> getCacheData() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? data = prefs.getString(widget.category);
-    // log(data!);
-    return data!;
-  }
-
   @override
   void initState() {
-    URL =
+    url =
         'https://nguyenanh.site/api/movie_app/category-movie.php?type=${widget.category}&page=$page';
     _future = fetchData();
     scrollController.addListener(
@@ -189,7 +120,7 @@ class _CategoryMovieListState extends State<CategoryMovieList> {
               itemCount: listMovieData.length + 1,
               itemBuilder: (context, index) {
                 if (index < listMovieData.length) {
-                  return GestureDetector(
+                  return InkWell(
                     onTap: () {
                       Navigator.push(
                         context,

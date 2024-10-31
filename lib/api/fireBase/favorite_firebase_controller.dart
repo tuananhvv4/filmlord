@@ -10,7 +10,7 @@ class FavoriteFirebaseController {
     return FirebaseAuth.instance.currentUser!.email.toString();
   }
 
-  Stream<QuerySnapshot> isFavoriteQuery(String slug) {
+  static Stream<QuerySnapshot> isFavoriteQuery(String slug) {
     final querySnapshot = db
         .collection('users')
         .doc(getCurrentEmail())
@@ -30,7 +30,7 @@ class FavoriteFirebaseController {
     return querySnapshot;
   }
 
-  Future addFavoriteMovie(
+  static Future addFavoriteMovie(
       String name, String slug, String thumbUrl, String posterUrl) async {
     final DocumentReference documentReference = db
         .collection('users')
@@ -50,7 +50,7 @@ class FavoriteFirebaseController {
     }
   }
 
-  Future<void> removeFavoriteMovie(String docID) async {
+  static Future<void> removeFavoriteMovie(String docID) async {
     final DocumentReference documentReference = db
         .collection('users')
         .doc(getCurrentEmail())
@@ -63,7 +63,7 @@ class FavoriteFirebaseController {
     }
   }
 
-  Future addRecommend(
+  static Future addRecommend(
       String name, String slug, String thumbUrl, String posterUrl) async {
     final DocumentReference documentReference =
         db.collection('recommendMovies').doc(slug);

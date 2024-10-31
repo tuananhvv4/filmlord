@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:quickalert/quickalert.dart';
 
-import '../../controller/fireBase/user_firebase_controller.dart';
+import '../../api/fireBase/user_firebase_controller.dart';
 import 'history_activity.dart';
-
 
 class UserSetting extends StatefulWidget {
   const UserSetting({super.key});
@@ -13,167 +12,176 @@ class UserSetting extends StatefulWidget {
 }
 
 class _UserSettingState extends State<UserSetting> {
-
-
   final _currentPasswordController = TextEditingController();
   final _newPasswordController = TextEditingController();
 
   late String currentUserEmail = '';
-  //firebase Controller
-  final firebaseController = UserFirebaseController();
 
-
-  void clearController(){
+  void clearController() {
     _currentPasswordController.clear();
     _newPasswordController.clear();
   }
 
-
   // Hiển thị cửa sổ nổi để thay đổi mật khẩu
-  void changePassWordDialog(){
-    showDialog(context: context,
-        builder: (context) {
-          return AlertDialog(
-            backgroundColor: Color.fromRGBO(46, 46, 46, 1),
-            title: const Text('Thay đổi mật khẩu',
-              style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 22
-              ),),
-
-            actions: [
-              Column(
-                children: [
-                  TextField(
-                    controller: _currentPasswordController,
-                    style: const TextStyle(
-                        color: Colors.white
+  void changePassWordDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: const Color.fromRGBO(46, 46, 46, 1),
+          title: const Text(
+            'Thay đổi mật khẩu',
+            textAlign: TextAlign.center,
+            style: TextStyle(color: Colors.white, fontSize: 22),
+          ),
+          titleTextStyle: const TextStyle(
+            color: Colors.white,
+            fontSize: 22,
+          ),
+          actions: [
+            Column(
+              children: [
+                TextField(
+                  controller: _currentPasswordController,
+                  style: const TextStyle(color: Colors.white),
+                  decoration: InputDecoration(
+                    labelText: 'Nhập mật khẩu cũ',
+                    labelStyle: const TextStyle(
+                      color: Colors.white,
                     ),
-                    decoration: InputDecoration(
-                      labelText: 'Nhập mật khẩu cũ',
-                      labelStyle: const TextStyle(
-                        color: Colors.white,
-                      ),
-                        filled: true,
-                        fillColor: Colors.white24,
-                        border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(5),
-                            borderSide: BorderSide.none
-                        ),
-                        hintText: 'Nhập mật khẩu cũ',
-                        hintStyle: const TextStyle(color: Colors.grey),
-
+                    filled: true,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(5),
                     ),
+                    hintText: 'Nhập mật khẩu cũ',
+                    hintStyle: const TextStyle(color: Colors.grey),
+                    prefixIcon: const Icon(Icons.lock, color: Colors.white),
                   ),
-                  const SizedBox(height: 10,),
-                  TextField(
-                    controller: _newPasswordController,
-                    style: const TextStyle(
-                        color: Colors.white
+                ),
+                const SizedBox(
+                  height: 10,
+                ),
+                TextField(
+                  controller: _newPasswordController,
+                  style: const TextStyle(color: Colors.white),
+                  decoration: InputDecoration(
+                    labelText: 'Nhập mật khẩu mới',
+                    labelStyle: const TextStyle(
+                      color: Colors.white,
                     ),
-                    decoration: InputDecoration(
-                      labelText: 'Nhập mật khẩu mới',
-                      labelStyle: const TextStyle(
-                        color: Colors.white,
-                      ),
-                      filled: true,
-                      fillColor: Colors.white24,
-                      border: OutlineInputBorder(
+                    filled: true,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(5),
+                    ),
+                    hintText: 'Nhập mật khẩu mới',
+                    hintStyle: const TextStyle(color: Colors.grey),
+                    prefixIcon: const Icon(Icons.lock, color: Colors.white),
+                  ),
+                ),
+                const SizedBox(
+                  height: 20,
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    OutlinedButton(
+                      onPressed: () {
+                        submitChangePassword(
+                            _currentPasswordController.text.trim(),
+                            _newPasswordController.text.trim());
+                      },
+                      style: OutlinedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(5),
-                          borderSide: BorderSide.none
+                        ),
                       ),
-                      hintText: 'Nhập mật khẩu mới',
-                      hintStyle: const TextStyle(color: Colors.grey),
-
+                      child: const Text(
+                        'Xác nhận',
+                        style: TextStyle(color: Colors.black, fontSize: 15),
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 20,),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      MaterialButton(
-                        onPressed: () {
-                          submitChangePassword(_currentPasswordController.text.trim(), _newPasswordController.text.trim());
-                        },
-                        child: const Text('Xác nhận',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 15
+                    OutlinedButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        clearController();
+                      },
+                      style: OutlinedButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(5),
                         ),
-                        ),
+                        fixedSize: const Size(110, 40),
                       ),
-                      MaterialButton(
-                        onPressed: () {
-                          Navigator.pop(context);
-                          clearController();
-                        },
-                        child: const Text('Hủy',
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 15
-                          ),),
+                      child: const Text(
+                        'Hủy',
+                        style: TextStyle(color: Colors.white, fontSize: 15),
                       ),
-                    ],
-                  ),
-                ],
-              )
-            ],
-          );
-        },);
+                    ),
+                  ],
+                ),
+              ],
+            )
+          ],
+        );
+      },
+    );
   }
 
-
   // Xử lý thay đổi mật khẩu
-  Future<void> submitChangePassword(String currentPassword, String newPassword) async {
+  Future<void> submitChangePassword(
+      String currentPassword, String newPassword) async {
     String titleNotification = '';
     bool checked = true;
-    if(currentPassword == newPassword){
+    if (currentPassword == newPassword) {
       titleNotification = 'Mật khẩu mới phải khác mật khẩu cũ!';
       checked = false;
     }
-    if(currentPassword == ''){
+    if (currentPassword == '') {
       titleNotification = 'Mật khẩu cũ không được để trống!';
       checked = false;
     }
-    if(newPassword == ''){
+    if (newPassword == '') {
       titleNotification = 'Mật khẩu mới không được để trống!';
       checked = false;
     }
-    if(newPassword.length < 6){
+    if (newPassword.length < 6) {
       titleNotification = 'Mật khẩu mới phải có ít nhất 6 kí tự!';
       checked = false;
     }
-    if(!checked){
-      QuickAlert.show(context: context,
+    if (!checked) {
+      QuickAlert.show(
+          context: context,
           type: QuickAlertType.error,
           title: titleNotification,
-          confirmBtnText: 'OK'
-      );
+          confirmBtnText: 'OK');
     }
 
     // xử lý mật khẩu
-    if(checked){
-      bool changedPassword = await firebaseController.changePassword(currentPassword, newPassword, context);
+    if (checked) {
+      bool changedPassword = await UserFirebaseController.changePassword(
+          currentPassword, newPassword, context);
       // Navigator.pop(context);
-      if(changedPassword){
+      if (changedPassword) {
         clearController();
       }
-
     }
-
   }
-
-
-
 
   @override
   void initState() {
     // TODO: implement initState
-    currentUserEmail = firebaseController.getUser() as String;
+    currentUserEmail = UserFirebaseController.getUserEmail() as String;
     super.initState();
   }
 
-
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    _currentPasswordController.dispose();
+    _newPasswordController.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -181,14 +189,9 @@ class _UserSettingState extends State<UserSetting> {
       appBar: AppBar(
         centerTitle: true,
         title: const Text('TÀI KHOẢN'),
-        titleTextStyle: const TextStyle(
-            color: Colors.white,
-            fontSize: 18
-        ),
+        titleTextStyle: const TextStyle(color: Colors.white, fontSize: 18),
         backgroundColor: Colors.black,
-        iconTheme: const IconThemeData(
-            color: Colors.white
-        ),
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
       backgroundColor: Colors.black,
       body: Padding(
@@ -197,25 +200,29 @@ class _UserSettingState extends State<UserSetting> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Container(
-              decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(50)
-              ),
+              decoration:
+                  BoxDecoration(borderRadius: BorderRadius.circular(50)),
               clipBehavior: Clip.hardEdge,
-              child: const Image(image: AssetImage('assets/images/avt-profile.png'),
+              child: const Image(
+                image: AssetImage('assets/images/avt-profile.png'),
                 height: 70,
                 width: 70,
-                fit: BoxFit.contain,),
+                fit: BoxFit.contain,
+              ),
             ),
             const SizedBox(
               height: 10,
             ),
-            const SizedBox(width: 10,),
-            Text(currentUserEmail,
+            const SizedBox(
+              width: 10,
+            ),
+            Text(
+              currentUserEmail,
               style: const TextStyle(
                   fontSize: 20,
                   color: Colors.white,
-                fontWeight: FontWeight.w500
-              ),),
+                  fontWeight: FontWeight.w500),
+            ),
             const SizedBox(
               height: 30,
             ),
@@ -228,8 +235,7 @@ class _UserSettingState extends State<UserSetting> {
                     width: double.maxFinite,
                     decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(20),
-                        color: Colors.white12
-                    ),
+                        color: Colors.white12),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -240,17 +246,22 @@ class _UserSettingState extends State<UserSetting> {
                               children: [
                                 Padding(
                                   padding: EdgeInsets.fromLTRB(10, 0, 5, 0),
-                                  child: Icon(Icons.lock,
+                                  child: Icon(
+                                    Icons.lock,
                                     color: Colors.white,
-                                    size: 22,),
+                                    size: 22,
+                                  ),
                                 ),
-                                SizedBox(width: 5,),
-                                Text('Thay đổi mật khẩu',
+                                SizedBox(
+                                  width: 5,
+                                ),
+                                Text(
+                                  'Thay đổi mật khẩu',
                                   style: TextStyle(
                                       fontSize: 15,
                                       color: Colors.white,
-                                      fontWeight: FontWeight.w300
-                                  ),),
+                                      fontWeight: FontWeight.w300),
+                                ),
                               ],
                             ),
                             Padding(
@@ -259,11 +270,12 @@ class _UserSettingState extends State<UserSetting> {
                                   onPressed: () {
                                     changePassWordDialog();
                                   },
-                                  icon: const Icon(Icons.arrow_forward_ios,
+                                  icon: const Icon(
+                                    Icons.arrow_forward_ios,
                                     color: Colors.white,
-                                    size: 22,),
-                                )
-                            )
+                                    size: 22,
+                                  ),
+                                ))
                           ],
                         )
                       ],
@@ -277,8 +289,7 @@ class _UserSettingState extends State<UserSetting> {
                     width: double.maxFinite,
                     decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(20),
-                        color: Colors.white12
-                    ),
+                        color: Colors.white12),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -289,17 +300,22 @@ class _UserSettingState extends State<UserSetting> {
                               children: [
                                 Padding(
                                   padding: EdgeInsets.fromLTRB(10, 0, 5, 0),
-                                  child: Icon(Icons.history,
+                                  child: Icon(
+                                    Icons.history,
                                     color: Colors.white,
-                                    size: 22,),
+                                    size: 22,
+                                  ),
                                 ),
-                                SizedBox(width: 5,),
-                                Text('Hoạt động gần đây',
+                                SizedBox(
+                                  width: 5,
+                                ),
+                                Text(
+                                  'Hoạt động gần đây',
                                   style: TextStyle(
                                       fontSize: 15,
                                       color: Colors.white,
-                                      fontWeight: FontWeight.w300
-                                  ),),
+                                      fontWeight: FontWeight.w300),
+                                ),
                               ],
                             ),
                             Padding(
@@ -310,10 +326,9 @@ class _UserSettingState extends State<UserSetting> {
                                       context,
                                       PageRouteBuilder(
                                         pageBuilder: (context, animation,
-                                            secondaryAnimation) =>
-                                        const HistoryActivity(),
-                                        transitionsBuilder: (context,
-                                            animation,
+                                                secondaryAnimation) =>
+                                            const HistoryActivity(),
+                                        transitionsBuilder: (context, animation,
                                             secondaryAnimation, child) {
                                           const begin = Offset(
                                               1.0, 0.0); // Trượt từ bên trái
@@ -321,11 +336,10 @@ class _UserSettingState extends State<UserSetting> {
                                           const curve = Curves.ease;
 
                                           var tween = Tween(
-                                              begin: begin, end: end)
-                                              .chain(
-                                              CurveTween(curve: curve));
+                                                  begin: begin, end: end)
+                                              .chain(CurveTween(curve: curve));
                                           var offsetAnimation =
-                                          animation.drive(tween);
+                                              animation.drive(tween);
 
                                           return SlideTransition(
                                             position: offsetAnimation,
@@ -335,11 +349,12 @@ class _UserSettingState extends State<UserSetting> {
                                       ),
                                     );
                                   },
-                                  icon: const Icon(Icons.arrow_forward_ios,
+                                  icon: const Icon(
+                                    Icons.arrow_forward_ios,
                                     color: Colors.white,
-                                    size: 22,),
-                                )
-                            )
+                                    size: 22,
+                                  ),
+                                ))
                           ],
                         )
                       ],

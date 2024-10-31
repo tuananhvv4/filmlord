@@ -1,4 +1,3 @@
-
 import 'package:flick_video_player/flick_video_player.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -6,14 +5,11 @@ import 'package:get/get.dart';
 import 'package:movies_app/model/detail_movie.dart';
 import 'package:video_player/video_player.dart';
 
-
 import '../../../controller/GetX/state_controller.dart';
-import '../../../controller/fireBase/history_firebase_controller.dart';
+import '../../../api/fireBase/history_firebase_controller.dart';
 import 'landscape_player_controls.dart';
 
 class LandscapePlayer extends StatefulWidget {
-
-
   final int currentIndex; // vị trí hiện tại
   final Movie movieDetail; // thông tin phim
   final List<String> videoUrlList; // danh sách URL Video
@@ -27,6 +23,7 @@ class LandscapePlayer extends StatefulWidget {
   });
 
   @override
+  // ignore: library_private_types_in_public_api
   _LandscapePlayerState createState() => _LandscapePlayerState();
 }
 
@@ -36,40 +33,32 @@ class _LandscapePlayerState extends State<LandscapePlayer> {
   //GetX Controller
   final stateController = Get.find<StateManager>();
 
-  // firebase controller
-  final historyController = HistoryFirebaseController();
-
   int currentEpisodeIndex = 0;
 
   // chuyển tập phim
   void _changeEpisode(int newIndex) async {
-
     currentEpisodeIndex = newIndex;
     // lưu lại thông tin tập phim sau khi chuyển
-    if(stateController.loginState.value){
-      try{
-        await  historyController.addEpisode(
+    if (stateController.loginState.value) {
+      try {
+        await HistoryFirebaseController.addEpisode(
             widget.movieDetail.name.toString(),
             widget.movieDetail.slug.toString(),
             widget.movieDetail.thumbUrl.toString(),
             widget.movieDetail.posterUrl.toString(),
-            widget.videoUrlList[currentEpisodeIndex].toString(),
+            widget.videoUrlList[newIndex].toString(),
             widget.movieEpisodeNameList[newIndex].toString(),
-            newIndex
-        );
-      }catch(e){
+            newIndex);
+      } catch (e) {
         print(e);
       }
     }
 
     setState(() {
-      flickManager.handleChangeVideo(
-          VideoPlayerController.network(widget.videoUrlList[currentEpisodeIndex]));
+      flickManager.handleChangeVideo(VideoPlayerController.networkUrl(
+          Uri.parse(widget.videoUrlList[newIndex])));
     });
   }
-  
-
-
 
   @override
   void initState() {
@@ -78,22 +67,21 @@ class _LandscapePlayerState extends State<LandscapePlayer> {
     flickManager = FlickManager(
         videoPlayerController: VideoPlayerController.networkUrl(
             Uri.parse(widget.videoUrlList[widget.currentIndex])));
-
   }
-
 
   @override
   void dispose() {
-
-    if(stateController.loginState.value){
-      historyController.updateWatchingTime(widget.movieDetail.slug.toString(),
-          widget.movieEpisodeNameList[currentEpisodeIndex], flickManager.flickVideoManager!.videoPlayerValue!.position.inMinutes.toInt());
+    if (stateController.loginState.value) {
+      HistoryFirebaseController.updateWatchingTime(
+          widget.movieDetail.slug.toString(),
+          widget.movieEpisodeNameList[currentEpisodeIndex],
+          flickManager.flickVideoManager!.videoPlayerValue!.position.inMinutes
+              .toInt());
     }
 
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
         overlays: SystemUiOverlay.values);
-    SystemChrome.setPreferredOrientations(
-        [DeviceOrientation.portraitUp]);
+    SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
     flickManager.dispose();
     stateController.enableAutoPlay();
     super.dispose();
@@ -111,7 +99,8 @@ class _LandscapePlayerState extends State<LandscapePlayer> {
         systemUIOverlay: const [],
         flickVideoWithControls: FlickVideoWithControls(
           videoFit: BoxFit.contain,
-          controls: LandscapePlayerControls( movieDetail: widget.movieDetail,
+          controls: LandscapePlayerControls(
+            movieDetail: widget.movieDetail,
             movieEpisodeName: widget.movieEpisodeNameList,
             initialEpisodeIndex: currentEpisodeIndex,
             episodesLength: widget.videoUrlList.length,

@@ -8,7 +8,7 @@ import 'package:movies_app/screens/movie/movie.dart';
 import 'package:movies_app/utilites/helper.dart';
 import 'package:shimmer/shimmer.dart';
 
-import '../../controller/fireBase/category_firebase_controller.dart';
+import '../../api/fireBase/category_firebase_controller.dart';
 import '../../controller/GetX/state_controller.dart';
 import '../../main.dart';
 
@@ -153,7 +153,7 @@ class _CategoryMovieFirebaseState extends State<CategoryMovieFirebase> {
               return Row(
                 children: [
                   Expanded(
-                    child: GestureDetector(
+                    child: InkWell(
                       onTap: () {
                         Navigator.push(
                           context,

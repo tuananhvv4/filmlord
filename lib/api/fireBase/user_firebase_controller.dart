@@ -6,35 +6,38 @@ import 'package:flutter/cupertino.dart';
 import 'package:quickalert/quickalert.dart';
 
 class UserFirebaseController {
-  final currentUser = FirebaseAuth.instance.currentUser;
-  final FirebaseFirestore db = FirebaseFirestore.instance;
+  static final currentUser = FirebaseAuth.instance.currentUser;
+  static final FirebaseFirestore db = FirebaseFirestore.instance;
 
-
-  String? getUser() {
+  static String? getUserEmail() {
     return currentUser!.email;
   }
 
+  static Future<bool> isUserSignedIn() async {
+    return currentUser != null;
+  }
 
   // Kiểm tra mật khẩu đã nhập có khớp với mật khẩu hiện tại hay không ?
-  Future<bool> checkCurrentPassword(String currentPassword) async {
-    try{
+  static Future<bool> checkCurrentPassword(String currentPassword) async {
+    try {
       final credential = EmailAuthProvider.credential(
         email: currentUser!.email!,
         password: currentPassword,
       );
       await currentUser!.reauthenticateWithCredential(credential);
       return true;
-    }catch(e){
+    } catch (e) {
       return false;
     }
   }
 
-  Future<bool> changePassword(String currentPassword,String newPassword, BuildContext context) async {
+  static Future<bool> changePassword(
+      String currentPassword, String newPassword, BuildContext context) async {
     bool passwordMatches = await checkCurrentPassword(currentPassword);
 
     //Nếu nhập đúng mật khẩu cũ
-    if(passwordMatches){
-      try{
+    if (passwordMatches) {
+      try {
         await currentUser!.updatePassword(newPassword);
         // ignore: use_build_context_synchronously
         Navigator.pop(context);
@@ -43,14 +46,14 @@ class UserFirebaseController {
             // ignore: use_build_context_synchronously
             context: context,
             type: QuickAlertType.success,
-        confirmBtnText: 'OK',
-        title: 'Thay đổi mật khẩu thành công');
+            confirmBtnText: 'OK',
+            title: 'Thay đổi mật khẩu thành công');
         return true;
-      }catch(e){
+      } catch (e) {
         log(e.toString());
         return false;
       }
-    }else{
+    } else {
       //Nếu nhập sai mật khẩu cũ
       // Navigator.pop(context);
       QuickAlert.show(
@@ -63,41 +66,42 @@ class UserFirebaseController {
     }
   }
 
-  Future<bool> userSignUp(String email, String password, BuildContext context) async {
-
+  static Future<bool> userSignUp(
+      String email, String password, BuildContext context) async {
     final CollectionReference user = db.collection('users');
     final DocumentReference documentReference = user.doc(email);
-    try{
-
-      await FirebaseAuth.instance.createUserWithEmailAndPassword(
-          email: email, password: password);
-      await documentReference.set({
-        'email' : email,
-        'time' : Timestamp.now()
-      });
+    try {
+      await FirebaseAuth.instance
+          .createUserWithEmailAndPassword(email: email, password: password);
+      await documentReference.set({'email': email, 'time': Timestamp.now()});
       return true;
       // ignore: empty_catches
-    } on FirebaseAuthException catch(e){
+    } on FirebaseAuthException catch (e) {
       String message = '';
-      switch(e.code){
-        case 'weak-password': {
-          message = 'Mật khẩu quá ngắn!';
-          break;
-        }
-        case 'email-already-in-use': {
-          message = 'Email đã được sử dụng!';
-          break;
-        }
-        case 'invalid-email': {
-          message = 'Email không hợp lệ';
-          break;
-        }
-        default: {
-          message = e.code.toString();
-        }
+      switch (e.code) {
+        case 'weak-password':
+          {
+            message = 'Mật khẩu quá ngắn!';
+            break;
+          }
+        case 'email-already-in-use':
+          {
+            message = 'Email đã được sử dụng!';
+            break;
+          }
+        case 'invalid-email':
+          {
+            message = 'Email không hợp lệ';
+            break;
+          }
+        default:
+          {
+            message = e.code.toString();
+          }
       }
       // ignore: use_build_context_synchronously
-      QuickAlert.show(context: context,
+      QuickAlert.show(
+          context: context,
           type: QuickAlertType.error,
           title: message,
           confirmBtnText: 'OK');

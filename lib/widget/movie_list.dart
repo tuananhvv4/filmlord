@@ -2,7 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:movies_app/api/api_services.dart';
+import 'package:movies_app/api/api_movies_services.dart';
 import 'package:movies_app/controller/GetX/state_controller.dart';
 import 'package:movies_app/model/data_movie.dart';
 import 'package:movies_app/screens/category/category_movie_api.dart';

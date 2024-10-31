@@ -8,8 +8,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:iconsax/iconsax.dart';
-import 'package:movies_app/api/api_services.dart';
-import 'package:movies_app/controller/fireBase/history_firebase_controller.dart';
+import 'package:movies_app/api/api_movies_services.dart';
+import 'package:movies_app/api/fireBase/history_firebase_controller.dart';
 import 'package:movies_app/model/data_movie.dart';
 import 'package:movies_app/screens/navigation/search_page.dart';
 import 'package:movies_app/screens/user/common.dart';
@@ -18,7 +18,7 @@ import 'package:movies_app/controller/GetX/state_controller.dart';
 import 'package:movies_app/widget/movie_list.dart';
 import 'package:shimmer/shimmer.dart';
 
-import '../../controller/fireBase/favorite_firebase_controller.dart';
+import '../../api/fireBase/favorite_firebase_controller.dart';
 import '../../model/detail_movie.dart';
 import '../category/category_movie_api.dart';
 import '../category/category_movie_firebase.dart';
@@ -40,10 +40,6 @@ class _HomePageState extends State<HomePage> {
 
   //getX Controller
   final stateController = Get.find<StateManager>();
-
-  // Firebase
-  final favoriteController = FavoriteFirebaseController();
-  final historyController = HistoryFirebaseController();
 
   // Future
   late Future<void> _futureNewMovies;
@@ -95,7 +91,7 @@ class _HomePageState extends State<HomePage> {
       }
     }
     if (stateController.loginState.value) {
-      await historyController.addEpisode(
+      await HistoryFirebaseController.addEpisode(
           movieDetail.name.toString(),
           movieDetail.slug.toString(),
           movieDetail.thumbUrl.toString(),
@@ -415,7 +411,7 @@ class _HomePageState extends State<HomePage> {
                                         () => stateController.loginState.value
                                             // đã đăng nhập
                                             ? StreamBuilder<QuerySnapshot>(
-                                                stream: favoriteController
+                                                stream: FavoriteFirebaseController
                                                     .isFavoriteQuery(newMoviesList[
                                                             stateController
                                                                 .currentCarouselIndex
@@ -439,13 +435,13 @@ class _HomePageState extends State<HomePage> {
                                                       child: ElevatedButton(
                                                         onPressed: () {
                                                           if (hasMovie) {
-                                                            favoriteController
+                                                            FavoriteFirebaseController
                                                                 .removeFavoriteMovie(
                                                                     documents
                                                                         .first
                                                                         .id);
                                                           } else {
-                                                            favoriteController.addFavoriteMovie(
+                                                            FavoriteFirebaseController.addFavoriteMovie(
                                                                 newMoviesList[stateController
                                                                         .currentCarouselIndex
                                                                         .value]
@@ -668,7 +664,7 @@ class _HomePageState extends State<HomePage> {
                 Obx(
                   () => stateController.loginState.value
                       ? StreamBuilder<QuerySnapshot>(
-                          stream: historyController.historyQuery(),
+                          stream: HistoryFirebaseController.historyQuery(),
                           builder: (context, snapshot) {
                             if (snapshot.connectionState ==
                                 ConnectionState.waiting) {

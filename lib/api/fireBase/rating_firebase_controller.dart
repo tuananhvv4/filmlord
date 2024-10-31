@@ -6,14 +6,14 @@ import 'package:flutter/material.dart';
 import 'package:quickalert/quickalert.dart';
 
 class RatingFirebaseController {
-  final FirebaseFirestore db = FirebaseFirestore.instance;
+  static final FirebaseFirestore db = FirebaseFirestore.instance;
 
-  String getCurrentEmail() {
+  static String getCurrentEmail() {
     return FirebaseAuth.instance.currentUser!.email.toString();
   }
 
   // Truy vấn dữ liệu
-  Stream<QuerySnapshot> ratingQuery(String slug) {
+  static Stream<QuerySnapshot> ratingQuery(String slug) {
     final querySnapshot = db
         .collection('movies')
         .doc(slug)
@@ -24,7 +24,7 @@ class RatingFirebaseController {
   }
 
   // Kiểm tra phim đã tồn tại hay chưa
-  Future<bool> checkDocumentExists(String documentID) async {
+  static Future<bool> checkDocumentExists(String documentID) async {
     try {
       // Truy cập vào tài liệu dựa trên ID trong Firestore
       DocumentSnapshot documentSnapshot =
@@ -38,8 +38,8 @@ class RatingFirebaseController {
   }
 
   // Thêm thông tin phim
-  Future addMovie(
-      String name, String slug, String thumb_url, String poster_url) async {
+  static Future addMovie(
+      String name, String slug, String thumbUrl, String posterUrl) async {
     bool existDocument = await checkDocumentExists(slug);
     if (!existDocument) {
       try {
@@ -48,8 +48,8 @@ class RatingFirebaseController {
         documentReference.set({
           'name': name,
           'slug': slug,
-          'thumb_url': thumb_url,
-          'poster_url': poster_url,
+          'thumb_url': thumbUrl,
+          'poster_url': posterUrl,
         });
       } catch (e) {
         log(e.toString());
@@ -58,8 +58,8 @@ class RatingFirebaseController {
   }
 
   // Thêm điểm đánh giá
-  Future addRating(int ratePoint, String name, String slug, String thumbUrl,
-      String posterUrl, BuildContext context) async {
+  static Future addRating(int ratePoint, String name, String slug,
+      String thumbUrl, String posterUrl, BuildContext context) async {
     await addMovie(name, slug, thumbUrl, posterUrl);
 
     final DocumentReference documentReference =
@@ -78,6 +78,7 @@ class RatingFirebaseController {
     } catch (e) {
       // ignore: use_build_context_synchronously
       QuickAlert.show(
+          // ignore: use_build_context_synchronously
           context: context,
           type: QuickAlertType.error,
           confirmBtnText: 'OK',
@@ -86,7 +87,7 @@ class RatingFirebaseController {
   }
 
   // Cập nhật đánh giá
-  Future updateRating(
+  static Future updateRating(
       int newRatePoint, String docID, String slug, BuildContext context) async {
     final DocumentReference documentReference =
         db.collection('movies').doc(slug).collection('rating').doc(docID);
@@ -107,7 +108,7 @@ class RatingFirebaseController {
   }
 
   // Xóa đánh giá
-  Future<void> removeRating(
+  static Future<void> removeRating(
       String slug, String docID, BuildContext context) async {
     final DocumentReference documentReference =
         db.collection('movies').doc(slug).collection('rating').doc(docID);
@@ -123,7 +124,8 @@ class RatingFirebaseController {
     }
   }
 
-  Future addHistoryActivity(String name, String slug, String action) async {
+  static Future addHistoryActivity(
+      String name, String slug, String action) async {
     String actionContent = '';
     if (action == 'comment') {
       actionContent = 'Đã thêm 1 bình luận!';

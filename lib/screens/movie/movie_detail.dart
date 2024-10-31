@@ -3,12 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_popup/flutter_popup.dart';
 import 'package:get/get.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
-import 'package:movies_app/controller/fireBase/favorite_firebase_controller.dart';
-import 'package:movies_app/controller/fireBase/history_firebase_controller.dart';
-import 'package:movies_app/controller/fireBase/rating_firebase_controller.dart';
+import 'package:movies_app/api/fireBase/favorite_firebase_controller.dart';
+import 'package:movies_app/api/fireBase/history_firebase_controller.dart';
+import 'package:movies_app/api/fireBase/rating_firebase_controller.dart';
 import 'package:movies_app/screens/movie/videoPlayer/flick_full_screen_custom.dart';
 import 'package:movies_app/screens/user/common.dart';
 import 'package:movies_app/controller/GetX/state_controller.dart';
+import 'package:movies_app/utilites/helper.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 import '../../controller/GetX/movie_controller.dart';
@@ -38,11 +39,6 @@ class _MovieDetailState extends State<MovieDetail> {
   final stateController = Get.find<StateManager>();
   final movieController = Get.find<MovieController>();
 
-  // Firebase
-  final historyController = HistoryFirebaseController();
-  final favoriteController = FavoriteFirebaseController();
-  final ratingController = RatingFirebaseController();
-
   // scroll controller
   final scrollController = ScrollController();
 
@@ -63,16 +59,6 @@ class _MovieDetailState extends State<MovieDetail> {
 
   late String trailerUrlEmbed;
   late final WebViewController webViewController;
-
-  String filterText(String input) {
-    String noHtmlTags = input.replaceAll(RegExp(r'<[^>]+>'), '');
-    String filteredText = noHtmlTags.replaceAll(
-      RegExp(
-          r'[^a-zA-Z0-9ÀÁÂÃÈÉẺÊÌÍÒÓÔÕÙÚĂĐĨŨƯƠÝYàáâãèéêìíòóôõùúăđĩũươẠ-ỹýy.,!? ]'),
-      '',
-    );
-    return filteredText;
-  }
 
   @override
   void initState() {
@@ -181,8 +167,8 @@ class _MovieDetailState extends State<MovieDetail> {
                 Obx(
                   () => stateController.loginState.value
                       ? StreamBuilder(
-                          stream: historyController
-                              .episodeQuery(widget.movieDetail.slug.toString()),
+                          stream: HistoryFirebaseController.episodeQuery(
+                              widget.movieDetail.slug.toString()),
                           builder: (context, snapshot) {
                             // Kiểm tra trạng thái kết nối
                             if (snapshot.connectionState ==
@@ -272,7 +258,7 @@ class _MovieDetailState extends State<MovieDetail> {
                                     const EdgeInsets.only(top: 10, bottom: 10),
                                 child: TextButton(
                                   onPressed: () async {
-                                    await historyController.addEpisode(
+                                    await HistoryFirebaseController.addEpisode(
                                         widget.movieDetail.name.toString(),
                                         widget.movieDetail.slug.toString(),
                                         widget.movieDetail.thumbUrl.toString(),
@@ -373,8 +359,8 @@ class _MovieDetailState extends State<MovieDetail> {
                       curve: Curves.decelerate,
                       child: Obx(
                         () {
-                          String filteredText =
-                              filterText(widget.movieDetail.content.toString());
+                          String filteredText = Helper.filterText(
+                              widget.movieDetail.content.toString());
                           return Text(
                             filteredText,
                             maxLines: stateController.showMoreDescription.value
@@ -470,8 +456,9 @@ class _MovieDetailState extends State<MovieDetail> {
                         () => stateController.loginState.value
                             // nếu đã đăng nhập
                             ? StreamBuilder<QuerySnapshot>(
-                                stream: favoriteController.isFavoriteQuery(
-                                    widget.movieDetail.slug.toString()),
+                                stream:
+                                    FavoriteFirebaseController.isFavoriteQuery(
+                                        widget.movieDetail.slug.toString()),
                                 builder: (context, snapshot) {
                                   if (snapshot.hasData) {
                                     final documents = snapshot.data!.docs;
@@ -480,11 +467,12 @@ class _MovieDetailState extends State<MovieDetail> {
                                     return TextButton(
                                       onPressed: () {
                                         if (hasMovie) {
-                                          favoriteController
+                                          FavoriteFirebaseController
                                               .removeFavoriteMovie(
                                                   documents.first.id);
                                         } else {
-                                          favoriteController.addFavoriteMovie(
+                                          FavoriteFirebaseController
+                                              .addFavoriteMovie(
                                             widget.movieDetail.name.toString(),
                                             widget.movieDetail.slug.toString(),
                                             widget.movieDetail.thumbUrl
@@ -581,7 +569,7 @@ class _MovieDetailState extends State<MovieDetail> {
                       // Nút đánh giá phim
                       Obx(() => stateController.loginState.value
                           ? StreamBuilder<QuerySnapshot>(
-                              stream: ratingController.ratingQuery(
+                              stream: RatingFirebaseController.ratingQuery(
                                   widget.movieDetail.slug.toString()),
                               builder: (context, snapshot) {
                                 if (snapshot.hasError) {
@@ -638,20 +626,23 @@ class _MovieDetailState extends State<MovieDetail> {
 
                                               return TextButton(
                                                 onPressed: () {
-                                                  ratingController.addRating(
-                                                      index,
-                                                      widget.movieDetail.name
-                                                          .toString(),
-                                                      widget.movieDetail.slug
-                                                          .toString(),
-                                                      widget
-                                                          .movieDetail.thumbUrl
-                                                          .toString(),
-                                                      widget
-                                                          .movieDetail.posterUrl
-                                                          .toString(),
-                                                      context);
-                                                  ratingController
+                                                  RatingFirebaseController
+                                                      .addRating(
+                                                          index,
+                                                          widget
+                                                              .movieDetail.name
+                                                              .toString(),
+                                                          widget
+                                                              .movieDetail.slug
+                                                              .toString(),
+                                                          widget.movieDetail
+                                                              .thumbUrl
+                                                              .toString(),
+                                                          widget.movieDetail
+                                                              .posterUrl
+                                                              .toString(),
+                                                          context);
+                                                  RatingFirebaseController
                                                       .addHistoryActivity(
                                                           widget
                                                               .movieDetail.name
@@ -738,14 +729,14 @@ class _MovieDetailState extends State<MovieDetail> {
                                             return TextButton(
                                               onPressed: () {
                                                 ratePoint == index
-                                                    ? ratingController
+                                                    ? RatingFirebaseController
                                                         .removeRating(
                                                             widget.movieDetail
                                                                 .slug
                                                                 .toString(),
                                                             document.id,
                                                             context)
-                                                    : ratingController
+                                                    : RatingFirebaseController
                                                         .updateRating(
                                                             index,
                                                             document.id,
@@ -868,7 +859,7 @@ class _MovieDetailState extends State<MovieDetail> {
         onPressed: () async {
           // Nếu đã đăng nhập thì lưu lại dữ liệu
           if (stateController.loginState.value) {
-            await historyController.addEpisode(
+            await HistoryFirebaseController.addEpisode(
               widget.movieDetail.name.toString(),
               widget.movieDetail.slug.toString(),
               widget.movieDetail.thumbUrl.toString(),

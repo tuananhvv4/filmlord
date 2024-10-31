@@ -8,8 +8,8 @@ import 'package:movies_app/screens/user/user_setting.dart';
 import 'package:shimmer/shimmer.dart';
 
 import '../../controller/GetX/state_controller.dart';
-import '../../controller/fireBase/favorite_firebase_controller.dart';
-import '../../controller/fireBase/history_firebase_controller.dart';
+import '../../api/fireBase/favorite_firebase_controller.dart';
+import '../../api/fireBase/history_firebase_controller.dart';
 import '../category/category_movie_firebase.dart';
 import '../movie/movie.dart';
 import '../user/common.dart';
@@ -405,7 +405,7 @@ class _UserPageState extends State<UserPage> {
                       },
                     ),
                     StreamBuilder<QuerySnapshot>(
-                      stream: HistoryFirebaseController().historyQuery(),
+                      stream: HistoryFirebaseController.historyQuery(),
                       builder: (context, snapshot) {
                         if (snapshot.connectionState ==
                             ConnectionState.waiting) {

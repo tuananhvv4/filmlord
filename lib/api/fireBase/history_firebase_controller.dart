@@ -4,16 +4,16 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class HistoryFirebaseController {
-  final FirebaseFirestore db = FirebaseFirestore.instance;
+  static final FirebaseFirestore db = FirebaseFirestore.instance;
 
-  final String collectionName = 'history';
-  final String childCollection = 'episodes';
+  static final String collectionName = 'history';
+  static final String childCollection = 'episodes';
 
-  String getCurrentEmail() {
+  static String getCurrentEmail() {
     return FirebaseAuth.instance.currentUser!.email.toString();
   }
 
-  Stream<QuerySnapshot> historyQuery() {
+  static Stream<QuerySnapshot> historyQuery() {
     final querySnapshot = db
         .collection('users')
         .doc(getCurrentEmail())
@@ -24,7 +24,7 @@ class HistoryFirebaseController {
     return querySnapshot;
   }
 
-  Stream<QuerySnapshot> episodeQuery(String documentID) {
+  static Stream<QuerySnapshot> episodeQuery(String documentID) {
     final querySnapshot = db
         .collection('users')
         .doc(getCurrentEmail())
@@ -37,7 +37,7 @@ class HistoryFirebaseController {
     return querySnapshot;
   }
 
-  Future<bool> checkDocumentExists(String documentId) async {
+  static Future<bool> checkDocumentExists(String documentId) async {
     try {
       // Truy cập vào tài liệu dựa trên ID trong Firestore
       DocumentSnapshot documentSnapshot = await db
@@ -55,7 +55,7 @@ class HistoryFirebaseController {
     }
   }
 
-  Future<bool> checkEpisodeExists(
+  static Future<bool> checkEpisodeExists(
       String documentId, String childDocumentID) async {
     try {
       // Truy cập vào tài liệu dựa trên ID trong Firestore
@@ -76,8 +76,8 @@ class HistoryFirebaseController {
     }
   }
 
-  Future addHistoryMovie(
-      String name, String slug, String thumb_url, String poster_url) async {
+  static Future addHistoryMovie(
+      String name, String slug, String thumbUrl, String posterUrl) async {
     bool existDocument = await checkDocumentExists(slug);
 
     final DocumentReference documentReference = db
@@ -92,8 +92,8 @@ class HistoryFirebaseController {
         documentReference.set({
           'name': name,
           'slug': slug,
-          'thumb_url': thumb_url,
-          'poster_url': poster_url,
+          'thumb_url': thumbUrl,
+          'poster_url': posterUrl,
           'time': Timestamp.now()
         });
       } catch (e) {
@@ -102,15 +102,9 @@ class HistoryFirebaseController {
     }
   }
 
-  Future addEpisode(
-      String movieName,
-      String slug,
-      String thumb_url,
-      String poster_url,
-      String movie_url,
-      String episodeName,
-      int index) async {
-    addHistoryMovie(movieName, slug, thumb_url, poster_url);
+  static Future addEpisode(String movieName, String slug, String thumbUrl,
+      String posterUrl, String movieUrl, String episodeName, int index) async {
+    addHistoryMovie(movieName, slug, thumbUrl, posterUrl);
 
     bool existEpisode = await checkEpisodeExists(slug, episodeName);
 
@@ -128,7 +122,7 @@ class HistoryFirebaseController {
         documentReference.set({
           'episodeName': episodeName,
           'slug': slug,
-          'movie_url': movie_url,
+          'movie_url': movieUrl,
           'index': index,
           'currentWatchingTime': 0,
           'time': Timestamp.now()
@@ -139,7 +133,7 @@ class HistoryFirebaseController {
     }
   }
 
-  Future<void> updateWatchingTime(
+  static Future<void> updateWatchingTime(
       String slug, String episodeName, int currentWatchingTime) async {
     final DocumentReference documentReference = db
         .collection('users')
@@ -153,7 +147,7 @@ class HistoryFirebaseController {
     });
   }
 
-  Future<void> removeHistoryMovie(String docID) async {
+  static Future<void> removeHistoryMovie(String docID) async {
     try {
       // Kiểm tra xem currentUserEmail có null không trước khi truy cập thuộc tính email
       if (getCurrentEmail().isNotEmpty) {
@@ -172,7 +166,7 @@ class HistoryFirebaseController {
     }
   }
 
-  Future<void> deleteDocumentWithSubCollections(String docID) async {
+  static Future<void> deleteDocumentWithSubCollections(String docID) async {
     try {
       // Lấy tài liệu cần xóa
       final documentRef = db
@@ -200,7 +194,8 @@ class HistoryFirebaseController {
     }
   }
 
-  Future addHistoryActivity(String name, String slug, String action) async {
+  static Future addHistoryActivity(
+      String name, String slug, String action) async {
     String actionContent = '';
     if (action == 'comment') {
       actionContent = 'Đã thêm 1 bình luận!';
