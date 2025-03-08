@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:movies_app/controller/GetX/movie_controller.dart';
 import 'package:movies_app/api/fireBase/user_firebase_controller.dart';
@@ -31,16 +32,18 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return GetMaterialApp(
-      title: 'FILMLORD',
-      debugShowCheckedModeBanner: false,
-      // theme: ThemeData(
-      //   colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-      //   useMaterial3: true,
-      // ),
-      theme: ThemeData.light(),
-      darkTheme: ThemeData.dark(),
-      home: const Navigation(),
+    return ProviderScope(
+      child: GetMaterialApp(
+        title: 'FILMLORD',
+        debugShowCheckedModeBanner: false,
+        // theme: ThemeData(
+        //   colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        //   useMaterial3: true,
+        // ),
+        theme: ThemeData.light(),
+        darkTheme: ThemeData.dark(),
+        home: const Navigation(),
+      ),
     );
   }
 }
@@ -58,13 +61,13 @@ class _NavigationState extends State<Navigation> {
   final movieController = Get.put(MovieController());
 
   // Kiểm tra trạng thái đăng nhập
-  Future<void> checkLoginStatus() async {
-    bool isSignedIn = await UserFirebaseController.isUserSignedIn();
-
-    if (isSignedIn) {
-      // Nếu người dùng đã đăng nhập
-      stateManager.updateLoginState(true);
-    }
+  checkLoginStatus() {
+    UserFirebaseController.isUserSignedIn().then((isSignedIn) {
+      if (isSignedIn) {
+        // Nếu người dùng đã đăng nhập
+        Get.find<StateManager>().updateLoginState(true);
+      }
+    });
   }
 
   int currentPageIndex = 0;

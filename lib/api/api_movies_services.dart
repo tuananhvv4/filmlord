@@ -136,4 +136,12 @@ class ApiServices {
     }
     return data;
   }
+
+  static Future<String> getMovieDetail(String slug) async {
+    var response = await http.get(Uri.parse('https://phimapi.com/phim/$slug'));
+    if (response.statusCode == 200) {
+      return response.body;
+    }
+    return '';
+  }
 }
